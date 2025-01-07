@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[10]:
 
 
 from pptx import Presentation  
@@ -126,76 +126,8 @@ def qhcr_color_opp(qhcr):
     else: color = "red"
     return color
 
-def roi_slide(template_roi,no,slide_no):
-    row_no, col_no = coordinate_finder_insheet_df(template_roi,"Submitted Claims",no)
-    revenue = template_roi.iloc[row_no-1,col_no]
-
-    row_no, col_no = coordinate_finder_insheet_df(template_roi,"Gross Collections",no)
-    gc = template_roi.iloc[row_no-1,col_no]
-    gc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-
-    row_no, col_no = coordinate_finder_insheet_df(template_roi,"Net Collections",no)
-    nc = template_roi.iloc[row_no-1,col_no]
-    nc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-    delta = template_roi.iloc[row_no-1,col_no+2]
-
-    row_no, col_no = coordinate_finder_insheet_df(template_roi,"Billing Costs",no)
-    bc = template_roi.iloc[row_no-1,col_no]
-    bc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-
-    row_no, col_no = coordinate_finder_insheet_df(template_roi,"Return on Investment",no)
-    roi = template_roi.iloc[row_no-1,col_no+2]
-
-    slide = root.slides[slide_no]
-
-    if delta < 0 : delta = 0
-
-    for shape in slide.shapes:
-        if shape.name == "TextBox 1":
-            shape.text = "{:,.1f}x ROI".format(roi)
-            tf = shape.text_frame
-            p = tf.paragraphs[0]
-            font = p.font
-            font.size = Pt(30)
-            font.name = 'Arial'
-            font.bold = True
-            p.alignment = PP_ALIGN.CENTER
-            if roi > 1 : font_color(shape,"green")
-            else : font_color(shape,"red")
-        elif shape.name == "TextBox 2":
-            shape.text = "+${:,.0f}K".format(round(delta,-5)/(10**3))
-            font_color(shape,"green")
-
-    for shape in slide.shapes:
-        if shape.name == "Chart 3":
-            chart = shape.chart
-
-    chart_data = CategoryChartData()
-    chart_data.categories = ["Current","QHCR"]
-    chart_data.add_series(assessment_name, (nc,nc_qhcr))
-    chart.replace_data(chart_data)
-
-    for shape in slide.shapes:
-        if shape.name == "Table 4":
-            table = shape.table
-
-    values_current = [revenue,gc,bc,nc]
-    values_qhcr = [revenue,gc_qhcr,bc_qhcr,nc_qhcr]
-
-    for i in range(1,len(values_current)+1):
-        cell = table.cell(1,i)
-        if i == 3 : cell.text = "${:,.2f}M".format(values_current[i-1]/(10**6))
-        else : cell.text = "${:,.1f}M".format(values_current[i-1]/(10**6))
-        text_format(cell)
-
-    for i in range(1,len(values_qhcr)+1):
-        cell = table.cell(2,i)
-        if i == 3 : cell.text = "${:,.2f}M".format(values_qhcr[i-1]/(10**6))
-        else : cell.text = "${:,.1f}M".format(values_qhcr[i-1]/(10**6))
-        text_format(cell)
-
-template_path = r"C:\Users\pragna_kandagatla\Desktop\Assessment PPT\AR Assessment - PPT - template.pptm"
-excel_path = r"C:\Users\pragna_kandagatla\Desktop\St Edwards\AR Assessment - St Edwards.xlsx"
+template_path = r"C:\Users\pragna_kandagatla\Desktop\Automation\Assessment PPT\AR Assessment - PPT - template.pptm"
+excel_path = r"C:\Users\pragna_kandagatla\Desktop\Automation\Assessment PPT\test.xlsx"
 output_path = r"C:\Users\pragna_kandagatla\Downloads\powerpoint.pptm"
 final_path = r"C:\Users\pragna_kandagatla\Downloads\AR Assessment - PPT.pptx"
 root = Presentation(template_path) 
@@ -274,7 +206,7 @@ idq = qhcr(dso_qhcr)
 idm = mi(dso_mi)
 color = qhcr_color_opp(dso_qhcr)
 
-dso_text = assessment_name + " Days of Sales Outstanding " + str(abs(dso_qhcr)) + " days " + idq +\
+dso_text = assessment_name + " Days of Sales Outstanding is " + str(abs(dso_qhcr)) + " days " + idq +\
                                   " QHCR’s Benchmark and is " + str(abs(dso_mi)) + " days "+ idm + " industry standard"
 
 for shape in slide.shapes:
@@ -304,7 +236,7 @@ idq = qhcr(ar_qhcr)
 idm = mi(ar_mi)
 color = qhcr_color_opp(ar_qhcr)
 
-ar_text = assessment_name +  " % of A/R Over 90 " + "{:.1%}".format(abs(ar_qhcr)) + " " + idq +\
+ar_text = assessment_name +  " % of A/R Over 90 is " + "{:.1%}".format(abs(ar_qhcr)) + " " + idq +\
                                   " QHCR’s Benchmark and is " + "{:.1%}".format(abs(ar_mi)) + " " + idm + " industry standard"
 
 for shape in slide.shapes:
@@ -563,12 +495,9 @@ for i in range(len(ar_table)+rows_to_delete,len(ar_table),-1):
     row = table.rows[i]
     remove_row(table,row)
 
-#---------------------------------------------------------Slide 11 and 12
-roi_slide(template_roi,1,10)
-roi_slide(template_roi,2,11)
 
-#--------------------------------------------------------------------Slide 13
-slide = root.slides[12]
+#--------------------------------------------------------------------Slide 11
+slide = root.slides[10]
 
 for shape in slide.shapes:
     if shape.name == "Table 7":

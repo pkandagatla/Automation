@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[10]:
 
 
 from pptx import Presentation  
@@ -72,14 +72,10 @@ def text_format_no_align(shape):
     font.size = Pt(10.5)
     
 def color_series(chart):
-    colors = {}
-    colors['QHCR Benchmark'] = 'F36622'
-
     for series in chart.series:
-        if series.name in colors:
-            fill = series.format.fill
-            fill.solid()
-            fill.fore_color.rgb = RGBColor.from_string(colors[series.name])
+        if series.name == "QHCR Benchmark" :
+            line = chart.series[series.index].format.line
+            line.color.rgb = RGBColor(242,101,34)
 
 def text_format_heading(shape):
     tf = shape.text_frame
@@ -146,76 +142,8 @@ def qhcr_color_opp(qhcr):
     else: color = "red"
     return color
 
-def roi_slide(template_roi,no,slide_no):
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Submitted Claims",no)
-    revenue = template_roi.iloc[row_no-1,col_no]
-
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Gross Collections",no)
-    gc = template_roi.iloc[row_no-1,col_no]
-    gc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Net Collections",no)
-    nc = template_roi.iloc[row_no-1,col_no]
-    nc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-    delta = template_roi.iloc[row_no-1,col_no+2]
-
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Billing Costs",no)
-    bc = template_roi.iloc[row_no-1,col_no]
-    bc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Return on Investment",no)
-    roi = template_roi.iloc[row_no-1,col_no+2]
-
-    slide = root.slides[slide_no]
-
-    if delta < 0 : delta = 0
-
-    for shape in slide.shapes:
-        if shape.name == "TextBox 1":
-            shape.text = "{:,.1f}x ROI".format(roi)
-            tf = shape.text_frame
-            p = tf.paragraphs[0]
-            font = p.font
-            font.size = Pt(30)
-            font.name = 'Arial'
-            font.bold = True
-            p.alignment = PP_ALIGN.CENTER
-            if roi > 1 : font_color(shape,"green")
-            else : font_color(shape,"red")
-        elif shape.name == "TextBox 2":
-            shape.text = "+${:,.0f}K".format(round(delta,-5)/(10**3))
-            font_color(shape,"green")
-
-    for shape in slide.shapes:
-        if shape.name == "Chart 3":
-            chart = shape.chart
-
-    chart_data = CategoryChartData()
-    chart_data.categories = ["Current","QHCR"]
-    chart_data.add_series(assessment_name, (nc,nc_qhcr))
-    chart.replace_data(chart_data)
-
-    for shape in slide.shapes:
-        if shape.name == "Table 4":
-            table = shape.table
-
-    values_current = [revenue,gc,bc,nc]
-    values_qhcr = [revenue,gc_qhcr,bc_qhcr,nc_qhcr]
-
-    for i in range(1,len(values_current)+1):
-        cell = table.cell(1,i)
-        if i == 3 : cell.text = "${:,.2f}M".format(values_current[i-1]/(10**6))
-        else : cell.text = "${:,.1f}M".format(values_current[i-1]/(10**6))
-        text_format(cell)
-
-    for i in range(1,len(values_qhcr)+1):
-        cell = table.cell(2,i)
-        if i == 3 : cell.text = "${:,.2f}M".format(values_qhcr[i-1]/(10**6))
-        else : cell.text = "${:,.1f}M".format(values_qhcr[i-1]/(10**6))
-        text_format(cell)
-
 template_path = r"C:\Users\pragna_kandagatla\Desktop\Assessment Multi - PPT\AR Assessment - Multifacility - PPT - prev assessment.pptm"
-excel_path = r"C:\Users\pragna_kandagatla\Desktop\Assessment Multi - PPT\AR Assessment - Crouse Community Centre(2).xlsx"
+excel_path = r"C:\Users\pragna_kandagatla\Desktop\Assessment Multi - PPT\cc.xlsx"
 output_path = r"C:\Users\pragna_kandagatla\Downloads\powerpoint.pptm"
 final_path = r"C:\Users\pragna_kandagatla\Downloads\AR Assessment - PPT.pptx"
 root = Presentation(template_path) 
@@ -315,7 +243,7 @@ idq = qhcr(dso_qhcr)
 idm = mi(dso_mi)
 color = qhcr_color_opp(dso_qhcr)
 
-dso_text = assessment_name + " Days of Sales Outstanding " + str(abs(dso_qhcr)) + " days " + idq +\
+dso_text = assessment_name + " Days of Sales Outstanding is " + str(abs(dso_qhcr)) + " days " + idq +\
                                   " QHCR’s Benchmark and is " + str(abs(dso_mi)) + " days "+ idm + " industry standard"
 
 for shape in slide.shapes:
@@ -351,7 +279,7 @@ idq = qhcr(ar_qhcr)
 idm = mi(ar_mi)
 color = qhcr_color_opp(ar_qhcr)
 
-ar_text = assessment_name +  " % of A/R Over 90 " + "{:.1%}".format(abs(ar_qhcr)) + " " + idq +\
+ar_text = assessment_name +  " % of A/R Over 90 is " + "{:.1%}".format(abs(ar_qhcr)) + " " + idq +\
                                   " QHCR’s Benchmark and is " + "{:.1%}".format(abs(ar_mi)) + " " + idm + " industry standard"
 
 for shape in slide.shapes:
@@ -444,8 +372,8 @@ row_no1, col_no1 = coordinate_finder_insheet(template_ncr,"Net Collection Rate",
 row_no2, col_no2 = coordinate_finder_insheet(template_ncr,"Expected Revenue - Overall",1)
 row_no3, col_no3 = coordinate_finder_insheet(template_ncr,"Payments - Overall",1)
 row_no4, col_no4 = coordinate_finder_insheet(template_ncr,"Missed Collections - QHCR Benchmark",1)
-row_no5, col_no5 = coordinate_finder_insheet(template_ncr,smonth,2)
-row_no6, col_no6 = coordinate_finder_insheet(template_ncr,emonth,2)
+row_no5, col_no5 = coordinate_finder_insheet(template_ncr,smonth,4)
+row_no6, col_no6 = coordinate_finder_insheet(template_ncr,emonth,4)
 
 ncr_values = list(template_ncr.iloc[row_no1-1,col_no5-1:col_no6])
 charges_values = list(template_ncr.iloc[row_no2-1,col_no5-1:col_no6])
@@ -580,7 +508,7 @@ for i in range(len(categories)):
     chart_data.add_series(categories[i], (ins.iloc[i],priv.iloc[i],total.iloc[i]))
 chart.replace_data(chart_data)
 
-row_no_start, col_no = coordinate_finder_insheet(template_aging_cal,"Over 90",1)
+row_no_start, col_no = coordinate_finder_insheet(template_aging_cal,"AR Over 90",1)
 row_no_end, col_no_new = coordinate_finder_insheet(template_aging_cal,"Payer Type Total",1)
 
 over_90 = template_aging_cal.iloc[row_no_start:row_no_end,col_no-1:col_no+1]
@@ -610,12 +538,9 @@ for i in range(len(ar_table)+rows_to_delete,len(ar_table),-1):
     row = table.rows[i]
     remove_row(table,row)
 
-#---------------------------------------------------------Slide 11 and 12
-roi_slide(template_roi,1,10)
-roi_slide(template_roi,2,11)
 
-#--------------------------------------------------------------------Slide 13
-slide = root.slides[12]
+#--------------------------------------------------------------------Slide 11
+slide = root.slides[10]
 
 for shape in slide.shapes:
     if shape.name == "Table 7":
@@ -631,7 +556,7 @@ for i in range(len(ncr_wo_private_facilities)):
     
 ar_qhcr_facilities = []
 for i in range(len(ar_facilities)):
-    ar_qhcr_facilities.append(0.15 - ar_facilities[i])
+    ar_qhcr_facilities.append(0.11 - ar_facilities[i])
     
 dso_qhcr_facilities = []
 for i in range(len(dso_facilities)):
@@ -703,14 +628,15 @@ for i in range(1,9):
         cell.text = assessment_name
         text_format_heading(cell)
 
-rows_to_delete = 12 - len(ncr_facilities)
+rows_to_delete = 70 - len(ncr_facilities)
 for i in range(len(ncr_facilities)+2+rows_to_delete,len(ncr_facilities)+2,-1):
     row = table.rows[i]
     remove_row(table,row)
     
-#-----------------------------------------------Slide 14
+        
+#-----------------------------------------------Slide 12
 
-slide = root.slides[13]
+slide = root.slides[11]
 
 ncr_prev = []
 ncr_wo_private_prev = []
@@ -757,6 +683,7 @@ for shape in slide.shapes:
         
 
 #-------------------ncr
+id1 = qhcr((ncr_values[-2]-ncr_values[-1]))
 ncr_text = assessment_name + " Net Collection Percentage for the current assessment (" + current[0] + ") is " + "{:.1%}".format(abs(ncr_values[-1]-ncr_values[-2])) + " " + id1 + " the Net Collection Percentage of previous assessment (" + all_assessment[-2] + ")."
 
 for shape in slide.shapes:
@@ -770,8 +697,7 @@ chart_data.add_series("QHCR Benchmark", [0.98]*len(all_assessment))
 chart.replace_data(chart_data)
 color_series(chart)
 
-id1 = qhcr((ncr_values[-1]-ncr_values[-2]))
-color = qhcr_color((ncr_values[-1]-ncr_values[-2]))
+color = qhcr_color((ncr_values[-2]-ncr_values[-1]))
 
 for shape in slide.shapes:
     if shape.name == "TextBox 5":
@@ -785,13 +711,14 @@ for shape in slide.shapes:
         
     if shape.name == "Oval 43":
         line = shape.line
-        if id == "below": line.color.rgb = RGBColor(0,176,80)
-        else: line.color.rgb = RGBColor(255,0,0) 
+        if id1 == "below": line.color.rgb = RGBColor(255,0,0)
+        else: line.color.rgb = RGBColor(0,176,80) 
             
             
 #---------------dso
 
-dso_text = assessment_name + " DSO for the current assessment (" + current[0] + ") is " + str(abs(dso_values[-1]-dso_values[-2])) + " " + id1 + " the DSO of previous assessment (" + all_assessment[-2] + ")."
+id1 = qhcr((dso_values[-2]-dso_values[-1]))
+dso_text = assessment_name + " DSO for the current assessment (" + current[0] + ") is " + str(abs(dso_values[-1]-dso_values[-2])) + " days " + id1 + " the DSO of previous assessment (" + all_assessment[-2] + ")."
 
 for shape in slide.shapes:
     if shape.name == "Chart 8":
@@ -804,8 +731,7 @@ chart_data.add_series("QHCR Benchmark", [34]*len(all_assessment))
 chart.replace_data(chart_data)
 color_series(chart)
 
-id1 = qhcr((dso_values[-1]-dso_values[-2]))
-color = qhcr_color_opp((dso_values[-1]-dso_values[-2]))
+color = qhcr_color_opp((dso_values[-2]-dso_values[-1]))
 
 for shape in slide.shapes:
     if shape.name == "TextBox 44":
@@ -819,12 +745,12 @@ for shape in slide.shapes:
         
     if shape.name == "Oval 33":
         line = shape.line
-        if id == "below": line.color.rgb = RGBColor(0,176,80)
+        if id1 == "below": line.color.rgb = RGBColor(0,176,80)
         else: line.color.rgb = RGBColor(255,0,0) 
             
             
 #--------------------ar
-
+id1 = qhcr((ar_values[-2]-ar_values[-1]))
 ar_text = assessment_name + " % AR over 90 for the current assessment (" + current[0] + ") is " + "{:.1%}".format(abs(ar_values[-1]-ar_values[-2])) + " " + id1 + " the % AR over 90 of previous assessment (" + all_assessment[-2] + ")."
         
 for shape in slide.shapes:
@@ -839,8 +765,7 @@ chart.replace_data(chart_data)
 color_series(chart)
 
 
-id1 = qhcr((ar_values[-1]-ar_values[-2]))
-color = qhcr_color_opp((ar_values[-1]-ar_values[-2]))
+color = qhcr_color_opp((ar_values[-2]-ar_values[-1]))
 
 for shape in slide.shapes:
     if shape.name == "TextBox 48":
@@ -854,7 +779,7 @@ for shape in slide.shapes:
         
     if shape.name == "Oval 47":
         line = shape.line
-        if id == "below": line.color.rgb = RGBColor(0,176,80)
+        if id1 == "below": line.color.rgb = RGBColor(0,176,80)
         else: line.color.rgb = RGBColor(255,0,0) 
  
 for shape in slide.shapes:
@@ -863,8 +788,8 @@ for shape in slide.shapes:
         + ". Miscellaneous Applied Cash has been removed for the purpose of this analysis to provide a more accurate view of Net Collections."
         text_format_footer(shape)
         
-#--------------------------------------------------------------------Slide 15
-slide = root.slides[14]
+#--------------------------------------------------------------------Slide 13
+slide = root.slides[12]
 
 for shape in slide.shapes:
     if shape.name == "Table 7":
@@ -880,7 +805,10 @@ for i in range(1,len(ncr_wo_private_values)):
     
 ar_prev = ["-"]
 for i in range(1,len(ar_values)):
-    ar_prev.append(ar_values[i] - ar_values[0])
+    if ar_values[i] == "-":
+        ar_prev.append("-")
+    else:
+        ar_prev.append(ar_values[i] - ar_values[0])
     
 dso_prev = ["-"]
 for i in range(1,len(dso_values)):

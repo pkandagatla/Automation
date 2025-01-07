@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 from pptx import Presentation  
@@ -21,7 +21,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def coordinate_finder_insheet(df,valuetofind,recurrence):   
+def coordinate_finder_insheet_df(df,valuetofind,recurrence):   
     found=False
     count=0
     for i in range(len(df)):
@@ -126,76 +126,9 @@ def qhcr_color_opp(qhcr):
     else: color = "red"
     return color
 
-def roi_slide(template_roi,no,slide_no):
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Submitted Claims",no)
-    revenue = template_roi.iloc[row_no-1,col_no]
 
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Gross Collections",no)
-    gc = template_roi.iloc[row_no-1,col_no]
-    gc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Net Collections",no)
-    nc = template_roi.iloc[row_no-1,col_no]
-    nc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-    delta = template_roi.iloc[row_no-1,col_no+2]
-
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Billing Costs",no)
-    bc = template_roi.iloc[row_no-1,col_no]
-    bc_qhcr = template_roi.iloc[row_no-1,col_no+1]
-
-    row_no, col_no = coordinate_finder_insheet(template_roi,"Return on Investment",no)
-    roi = template_roi.iloc[row_no-1,col_no+2]
-
-    slide = root.slides[slide_no]
-
-    if delta < 0 : delta = 0
-
-    for shape in slide.shapes:
-        if shape.name == "TextBox 1":
-            shape.text = "{:,.1f}x ROI".format(roi)
-            tf = shape.text_frame
-            p = tf.paragraphs[0]
-            font = p.font
-            font.size = Pt(30)
-            font.name = 'Arial'
-            font.bold = True
-            p.alignment = PP_ALIGN.CENTER
-            if roi > 1 : font_color(shape,"green")
-            else : font_color(shape,"red")
-        elif shape.name == "TextBox 2":
-            shape.text = "+${:,.0f}K".format(round(delta,-5)/(10**3))
-            font_color(shape,"green")
-
-    for shape in slide.shapes:
-        if shape.name == "Chart 3":
-            chart = shape.chart
-
-    chart_data = CategoryChartData()
-    chart_data.categories = ["Current","QHCR"]
-    chart_data.add_series(assessment_name, (nc,nc_qhcr))
-    chart.replace_data(chart_data)
-
-    for shape in slide.shapes:
-        if shape.name == "Table 4":
-            table = shape.table
-
-    values_current = [revenue,gc,bc,nc]
-    values_qhcr = [revenue,gc_qhcr,bc_qhcr,nc_qhcr]
-
-    for i in range(1,len(values_current)+1):
-        cell = table.cell(1,i)
-        if i == 3 : cell.text = "${:,.2f}M".format(values_current[i-1]/(10**6))
-        else : cell.text = "${:,.1f}M".format(values_current[i-1]/(10**6))
-        text_format(cell)
-
-    for i in range(1,len(values_qhcr)+1):
-        cell = table.cell(2,i)
-        if i == 3 : cell.text = "${:,.2f}M".format(values_qhcr[i-1]/(10**6))
-        else : cell.text = "${:,.1f}M".format(values_qhcr[i-1]/(10**6))
-        text_format(cell)
-
-template_path = r"C:\Users\pragna_kandagatla\Desktop\Assessment Multi - PPT\AR Assessment - Multifacility - PPT.pptx"
-excel_path = r"C:\Users\pragna_kandagatla\Desktop\Assessment Multi - PPT\AR Assessment - Pioneer Health.xlsx"
+template_path = r"C:\Users\pragna_kandagatla\Desktop\Assessment Multi - PPT\AR Assessment - Multifacility - PPT.pptm"
+excel_path = r"C:\Users\pragna_kandagatla\Desktop\mybrio\AR Assessment - MyBrio.xlsx"
 output_path = r"C:\Users\pragna_kandagatla\Downloads\powerpoint.pptm"
 final_path = r"C:\Users\pragna_kandagatla\Downloads\AR Assessment - PPT.pptx"
 root = Presentation(template_path) 
@@ -210,7 +143,7 @@ if "DSO & NCR" in template.sheet_names:
 else:
     template_ncr = pd.read_excel(excel_path,sheet_name="NCR",header=None)
     
-r1,c1 = coordinate_finder_insheet(template_assessment_metrics,"Parameters",1)
+r1,c1 = coordinate_finder_insheet_df(template_assessment_metrics,"Parameters",1)
 facility_names = list(template_assessment_metrics.iloc[r1-1,c1+1:])
 no_facility = len(facility_names)
 
@@ -223,28 +156,28 @@ find_replace_text(root, "Assessment Name", assessment_name)
 slide = root.slides[4]
 
 #---------NCR-------------
-row_no, col_no = coordinate_finder_insheet(template_assessment_metrics,"Net Collection Rate",1)
-row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,"Overall",1)
+row_no, col_no = coordinate_finder_insheet_df(template_assessment_metrics,"Net Collection Rate",1)
+row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,"Overall",1)
 ncr = template_assessment_metrics.iloc[row_no-1,col_no1-1]
 ncr_facilities = []
 
 for i in range(no_facility):
-    row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,facility_names[i],1)
+    row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,facility_names[i],1)
     ncr_facilities.append(template_assessment_metrics.iloc[row_no-1,col_no1-1])
     
-row_no, col_no = coordinate_finder_insheet(template_assessment_metrics,"Net Collection Rate excluding Private",1)
-row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,"Overall",1)
+row_no, col_no = coordinate_finder_insheet_df(template_assessment_metrics,"Net Collection Rate excluding Private",1)
+row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,"Overall",1)
 ncr_wo_private = template_assessment_metrics.iloc[row_no-1,col_no1-1]
 ncr_wo_private_facilities = []
 
 for i in range(no_facility):
-    row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,facility_names[i],1)
+    row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,facility_names[i],1)
     ncr_wo_private_facilities.append(template_assessment_metrics.iloc[row_no-1,col_no1-1])
 
-row_no, col_no = coordinate_finder_insheet(template_assessment_metrics,"Industry Standard",1)
+row_no, col_no = coordinate_finder_insheet_df(template_assessment_metrics,"Industry Standard",1)
 missed_mi = template_assessment_metrics.iloc[row_no-1,col_no+1]
 
-row_no, col_no = coordinate_finder_insheet(template_assessment_metrics,"QHCR Benchmark",1)
+row_no, col_no = coordinate_finder_insheet_df(template_assessment_metrics,"QHCR Benchmark",1)
 missed_qhcr = template_assessment_metrics.iloc[row_no-1,col_no+1]
 
 ncr_mi = 0.95 - ncr
@@ -279,13 +212,13 @@ for shape in slide.shapes:
         
 #--------------------DSO------------------
         
-row_no, col_no = coordinate_finder_insheet(template_assessment_metrics,"DSO",1)
-row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,"Overall",1)
+row_no, col_no = coordinate_finder_insheet_df(template_assessment_metrics,"DSO",1)
+row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,"Overall",1)
 dso = round(template_assessment_metrics.iloc[row_no-1,col_no1-1])
 dso_facilities = []
 
 for i in range(no_facility):
-    row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,facility_names[i],1)
+    row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,facility_names[i],1)
     dso_facilities.append(round(template_assessment_metrics.iloc[row_no-1,col_no1-1]))
 
 dso_mi = round(40 - dso)
@@ -295,7 +228,7 @@ idq = qhcr(dso_qhcr)
 idm = mi(dso_mi)
 color = qhcr_color_opp(dso_qhcr)
 
-dso_text = assessment_name + " Days of Sales Outstanding " + str(abs(dso_qhcr)) + " days " + idq +\
+dso_text = assessment_name + " Days of Sales Outstanding is " + str(abs(dso_qhcr)) + " days " + idq +\
                                   " QHCR’s Benchmark and is " + str(abs(dso_mi)) + " days "+ idm + " industry standard"
 
 for shape in slide.shapes:
@@ -315,14 +248,14 @@ for shape in slide.shapes:
         
 #----------------AR Over 90--------------------
         
-row_no, col_no = coordinate_finder_insheet(template_assessment_metrics,"% AR Over 90",1)
-row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,"Overall",1)
+row_no, col_no = coordinate_finder_insheet_df(template_assessment_metrics,"% AR Over 90",1)
+row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,"Overall",1)
 ar = template_assessment_metrics.iloc[row_no-1,col_no1-1]
 
 ar_facilities = []
 
 for i in range(no_facility):
-    row_no1,col_no1 = coordinate_finder_insheet(template_assessment_metrics,facility_names[i],1)
+    row_no1,col_no1 = coordinate_finder_insheet_df(template_assessment_metrics,facility_names[i],1)
     ar_facilities.append(template_assessment_metrics.iloc[row_no-1,col_no1-1])
 
 ar_mi = 0.15 - ar
@@ -332,7 +265,7 @@ idq = qhcr(ar_qhcr)
 idm = mi(ar_mi)
 color = qhcr_color_opp(ar_qhcr)
 
-ar_text = assessment_name +  " % of A/R Over 90 " + "{:.1%}".format(abs(ar_qhcr)) + " " + idq +\
+ar_text = assessment_name +  " % of A/R Over 90 is " + "{:.1%}".format(abs(ar_qhcr)) + " " + idq +\
                                   " QHCR’s Benchmark and is " + "{:.1%}".format(abs(ar_mi)) + " " + idm + " industry standard"
 
 for shape in slide.shapes:
@@ -352,10 +285,10 @@ for shape in slide.shapes:
         
 #----- date range
 
-row_no, col_no = coordinate_finder_insheet(template_ncr,"Start Month",1)
+row_no, col_no = coordinate_finder_insheet_df(template_ncr,"Start Month",1)
 smonth = template_ncr.iloc[row_no,col_no-1]
 
-row_no, col_no = coordinate_finder_insheet(template_ncr,"End Month",1)
+row_no, col_no = coordinate_finder_insheet_df(template_ncr,"End Month",1)
 emonth = template_ncr.iloc[row_no,col_no-1]
 
 for shape in slide.shapes:
@@ -421,12 +354,12 @@ chart.replace_data(chart_data)
 
 slide = root.slides[6]
 
-row_no1, col_no1 = coordinate_finder_insheet(template_ncr,"Net Collection Rate",1)
-row_no2, col_no2 = coordinate_finder_insheet(template_ncr,"Expected Revenue - Overall",1)
-row_no3, col_no3 = coordinate_finder_insheet(template_ncr,"Payments - Overall",1)
-row_no4, col_no4 = coordinate_finder_insheet(template_ncr,"Missed Collections - QHCR Benchmark",1)
-row_no5, col_no5 = coordinate_finder_insheet(template_ncr,smonth,2)
-row_no6, col_no6 = coordinate_finder_insheet(template_ncr,emonth,2)
+row_no1, col_no1 = coordinate_finder_insheet_df(template_ncr,"Net Collection Rate",1)
+row_no2, col_no2 = coordinate_finder_insheet_df(template_ncr,"Expected Revenue - Overall",1)
+row_no3, col_no3 = coordinate_finder_insheet_df(template_ncr,"Payments - Overall",1)
+row_no4, col_no4 = coordinate_finder_insheet_df(template_ncr,"Missed Collections - QHCR Benchmark",1)
+row_no5, col_no5 = coordinate_finder_insheet_df(template_ncr,smonth,2)
+row_no6, col_no6 = coordinate_finder_insheet_df(template_ncr,emonth,2)
 
 ncr_values = list(template_ncr.iloc[row_no1-1,col_no5-1:col_no6])
 charges_values = list(template_ncr.iloc[row_no2-1,col_no5-1:col_no6])
@@ -543,7 +476,7 @@ chart.replace_data(chart_data)
 #--------------------------------------------------------------------Slide 9
 
 slide = root.slides[8]
-row_no, col_no = coordinate_finder_insheet(template_aging_cal,"Balance",2)
+row_no, col_no = coordinate_finder_insheet_df(template_aging_cal,"Balance",2)
 
 priv = template_aging_cal.iloc[row_no,col_no:col_no+9]
 ins = template_aging_cal.iloc[row_no+1,col_no:col_no+9]
@@ -561,8 +494,8 @@ for i in range(len(categories)):
     chart_data.add_series(categories[i], (ins.iloc[i],priv.iloc[i],total.iloc[i]))
 chart.replace_data(chart_data)
 
-row_no_start, col_no = coordinate_finder_insheet(template_aging_cal,"Over 90",1)
-row_no_end, col_no_new = coordinate_finder_insheet(template_aging_cal,"Payer Type Total",1)
+row_no_start, col_no = coordinate_finder_insheet_df(template_aging_cal,"AR Over 90",1)
+row_no_end, col_no_new = coordinate_finder_insheet_df(template_aging_cal,"Payer Type Total",1)
 
 over_90 = template_aging_cal.iloc[row_no_start:row_no_end,col_no-1:col_no+1]
 over_90.iloc[:,0] = over_90.iloc[:,0].astype(int)
@@ -591,12 +524,8 @@ for i in range(len(ar_table)+rows_to_delete,len(ar_table),-1):
     row = table.rows[i]
     remove_row(table,row)
 
-#---------------------------------------------------------Slide 11 and 12
-roi_slide(template_roi,1,10)
-roi_slide(template_roi,2,11)
-
-#--------------------------------------------------------------------Slide 13
-slide = root.slides[12]
+#--------------------------------------------------------------------Slide 11
+slide = root.slides[10]
 
 for shape in slide.shapes:
     if shape.name == "Table 7":
@@ -612,7 +541,7 @@ for i in range(len(ncr_wo_private_facilities)):
     
 ar_qhcr_facilities = []
 for i in range(len(ar_facilities)):
-    ar_qhcr_facilities.append(0.15 - ar_facilities[i])
+    ar_qhcr_facilities.append(0.11 - ar_facilities[i])
     
 dso_qhcr_facilities = []
 for i in range(len(dso_facilities)):
@@ -684,7 +613,7 @@ for i in range(1,9):
         cell.text = assessment_name
         text_format_heading(cell)
 
-rows_to_delete = 12 - len(ncr_facilities)
+rows_to_delete = 70 - len(ncr_facilities)
 for i in range(len(ncr_facilities)+2+rows_to_delete,len(ncr_facilities)+2,-1):
     row = table.rows[i]
     remove_row(table,row)
